@@ -3,6 +3,8 @@ import { MatAutocomplete, FloatLabelType } from '@angular/material';
 import { AutocompleteService } from './autocomplete.service';
 import { HttpParams } from '@angular/common/http';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor, FormControl } from '@angular/forms';
+import { Observable, fromEvent } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'ng-mat-autocomplete',
@@ -60,6 +62,7 @@ export class AutocompleteComponent implements AfterViewInit, OnInit, ControlValu
   }
 
   @Input() name = '';
+  @Input() timeout: number = 500;
   @Input() placeholder = '';
   @Input() floatLabel: FloatLabelType = 'auto';
   @Input() formControl?: FormControl;
@@ -110,6 +113,10 @@ export class AutocompleteComponent implements AfterViewInit, OnInit, ControlValu
         this.autocompleteInput.nativeElement.focus();
       });
     }
+    fromEvent(this.autocompleteInput, 'keyup').pipe(debounceTime(this.timeout)).subscribe((value: KeyboardEvent) => {
+      this.onKey(value);
+    });
+
   }
 
   public prefetch() {
